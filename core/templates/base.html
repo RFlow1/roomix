@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Roomix{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50:  '#fdf6f0',
+              100: '#fde8d8',
+              400: '#f4845f',
+              500: '#ef6c45',
+              600: '#e05530',
+            }
+          },
+          borderRadius: { xl: '1rem', '2xl': '1.5rem' }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-brand-50 text-gray-800 min-h-screen flex flex-col">
+
+  {% include "includes/_navbar.html" %}
+
+  <!-- Flash messages -->
+  {% if messages %}
+    <div class="max-w-5xl mx-auto w-full px-4 pt-4 space-y-2">
+      {% for message in messages %}
+        <div class="rounded-xl px-4 py-3 text-sm font-medium
+          {% if message.tags == 'error' %}bg-red-100 text-red-700
+          {% elif message.tags == 'success' %}bg-green-100 text-green-700
+          {% else %}bg-brand-100 text-brand-600{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <main class="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="text-center text-xs text-gray-400 py-6">
+    © 2025 Roomix — Find your perfect roommate
+  </footer>
+
+</body>
+</html>

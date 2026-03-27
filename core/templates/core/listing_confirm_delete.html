@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Delete listing — Roomix{% endblock %}
+{% block content %}
+<div class="max-w-sm mx-auto text-center py-20">
+  <p class="text-5xl mb-4">🗑️</p>
+  <h1 class="text-2xl font-bold text-gray-800 mb-2">Delete this listing?</h1>
+  <p class="text-gray-500 text-sm mb-6">
+    "<span class="font-medium text-gray-700">{{ object.title }}</span>" will be permanently removed.
+  </p>
+  <form method="POST" class="flex justify-center gap-3">
+    {% csrf_token %}
+    <a href="{{ object.get_absolute_url }}"
+       class="px-5 py-2.5 rounded-xl border border-gray-200 text-sm hover:border-gray-300 transition">
+      Cancel
+    </a>
+    <button type="submit"
+            class="px-5 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm transition">
+      Yes, delete
+    </button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Find a Room — Roomix{% endblock %}
+
+{% block content %}
+
+  <!-- Hero -->
+  <div class="text-center py-10">
+    <h1 class="text-4xl font-bold text-gray-800 mb-2">Find your perfect room 🏠</h1>
+    <p class="text-gray-500 text-lg">Browse student-friendly rooms and find great roommates</p>
+  </div>
+
+  <!-- Mobile search -->
+  <form method="GET" class="sm:hidden flex gap-2 mb-6">
+    <input type="text" name="q" value="{{ request.GET.q }}"
+           placeholder="Search location or title..."
+           class="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"/>
+    <button type="submit"
+            class="bg-brand-500 text-white px-4 py-2 rounded-xl text-sm">Search</button>
+  </form>
+
+  <!-- Result count -->
+  {% if request.GET.q %}
+    <p class="text-sm text-gray-500 mb-4">
+      Showing results for <span class="font-medium text-gray-700">"{{ request.GET.q }}"</span>
+      — {{ paginator.count }} listing{{ paginator.count|pluralize }}
+      <a href="{% url 'home' %}" class="ml-2 text-brand-500 hover:underline">Clear</a>
+    </p>
+  {% endif %}
+
+  <!-- Grid -->
+  {% if listings %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for item in listings %}
+        <a href="{{ item.get_absolute_url }}"
+           class="bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden group flex flex-col">
+
+          <!-- Image -->
+          <div class="h-48 bg-brand-100 overflow-hidden">
+            {% with item.images.first as img %}
+              {% if img %}
+                <img src="{{ img.image.url }}" alt="{{ item.title }}"
+                     class="w-full h-full object-cover group-hover:scale-105 transition duration-300"/>
+              {% else %}
+                <div class="w-full h-full flex items-center justify-center text-brand-400 text-4xl">🏠</div>
+              {% endif %}
+            {% endwith %}
+          </div>
+
+          <!-- Info -->
+          <div class="p-4 flex flex-col gap-1 flex-1">
+            <div class="flex items-start justify-between gap-2">
+              <h3 class="font-semibold text-gray-800 text-sm leading-snug line-clamp-2 group-hover:text-brand-500 transition">
+                {{ item.title }}
+              </h3>
+              <span class="text-brand-500 font-bold text-sm whitespace-nowrap">${{ item.price }}/mo</span>
+            </div>
+            <p class="text-xs text-gray-400">📍 {{ item.location }}</p>
+            <p class="text-xs text-gray-400 mt-auto pt-2 border-t border-gray-100">
+              Available {{ item.available_from|date:"M j, Y" }} · {{ item.owner.username }}
+            </p>
+          </div>
+
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-24 text-gray-400">
+      <p class="text-5xl mb-4">🔍</p>
+      <p class="text-lg font-medium">No listings found</p>
+      <p class="text-sm mt-1">Try a different search or
+        <a href="{% url 'listing-create' %}" class="text-brand-500 hover:underline">post your own</a>
+      </p>
+    </div>
+  {% endif %}
+
+  <!-- Pagination -->
+  {% if is_paginated %}
+    <div class="flex justify-center gap-2 mt-10">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+           class="px-4 py-2 rounded-xl bg-white border border-gray-200 text-sm hover:border-brand-400 transition">
+          ← Previous
+        </a>
+      {% endif %}
+      <span class="px-4 py-2 text-sm text-gray-500">
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      </span>
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+           class="px-4 py-2 rounded-xl bg-white border border-gray-200 text-sm hover:border-brand-400 transition">
+          Next →
+        </a>
+      {% endif %}
+    </div>
+  {% endif %}
+
+{% endblock %}

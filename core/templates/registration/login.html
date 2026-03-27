@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load core_extras %}
+{% block title %}Log in — Roomix{% endblock %}
+
+{% block content %}
+<div class="max-w-sm mx-auto">
+  <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Welcome back 👋</h1>
+
+  <form method="POST" class="bg-white rounded-2xl shadow-sm p-6 flex flex-col gap-4">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-gray-700">{{ field.label }}</label>
+        {{ field|add_class:"border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 w-full" }}
+        {% if field.errors %}
+          <p class="text-xs text-red-400">{{ field.errors|join:", " }}</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+    <button type="submit"
+            class="bg-brand-500 hover:bg-brand-600 text-white py-2.5 rounded-xl font-medium transition mt-1">
+      Log in
+    </button>
+  </form>
+
+  <p class="text-center text-sm text-gray-500 mt-4">
+    No account yet?
+    <a href="{% url 'register' %}" class="text-brand-500 hover:underline font-medium">Sign up free</a>
+  </p>
+</div>
+{% endblock %}

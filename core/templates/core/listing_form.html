@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load core_extras %}
+{% block title %}{% if form.instance.pk %}Edit listing{% else %}Post a listing{% endif %} — Roomix{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto">
+  <h1 class="text-2xl font-bold text-gray-800 mb-6">
+    {% if form.instance.pk %}Edit your listing{% else %}Post a new listing 🏠{% endif %}
+  </h1>
+
+  <form method="POST" enctype="multipart/form-data"
+        class="bg-white rounded-2xl shadow-sm p-6 flex flex-col gap-5">
+    {% csrf_token %}
+
+    {% for field in form %}
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-gray-700">{{ field.label }}</label>
+        {{ field|add_class:"border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 w-full" }}
+        {% if field.errors %}
+          <p class="text-xs text-red-400">{{ field.errors|join:", " }}</p>
+        {% endif %}
+        {% if field.help_text %}
+          <p class="text-xs text-gray-400">{{ field.help_text }}</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+
+    <div class="flex flex-col gap-1">
+      <label class="text-sm font-medium text-gray-700">Photos</label>
+      <input type="file" name="images" multiple accept="image/*"
+             class="text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-4 file:rounded-xl
+                    file:border-0 file:bg-brand-100 file:text-brand-600 hover:file:bg-brand-200"/>
+      <p class="text-xs text-gray-400">Upload up to 10 photos</p>
+    </div>
+
+    <button type="submit"
+            class="bg-brand-500 hover:bg-brand-600 text-white py-2.5 rounded-xl font-medium transition">
+      {% if form.instance.pk %}Save changes{% else %}Post listing{% endif %}
+    </button>
+
+  </form>
+</div>
+{% endblock %}

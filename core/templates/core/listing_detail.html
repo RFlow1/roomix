@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}{{ listing.title }} — Roomix{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+
+  <!-- Image gallery -->
+  <div class="rounded-2xl overflow-hidden bg-brand-100 h-72 mb-6">
+    {% with listing.images.first as img %}
+      {% if img %}
+        <img src="{{ img.image.url }}" alt="{{ listing.title }}" class="w-full h-full object-cover"/>
+      {% else %}
+        <div class="w-full h-full flex items-center justify-center text-6xl text-brand-300">🏠</div>
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Additional images -->
+  {% if listing.images.count > 1 %}
+    <div class="grid grid-cols-3 gap-3 mb-6">
+      {% for img in listing.images.all|slice:"1:4" %}
+        <div class="h-28 rounded-xl overflow-hidden bg-brand-100">
+          <img src="{{ img.image.url }}" alt="" class="w-full h-full object-cover"/>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="flex flex-col gap-6 lg:flex-row lg:gap-10">
+
+    <!-- Main info -->
+    <div class="flex-1">
+      <h1 class="text-2xl font-bold text-gray-800 mb-1">{{ listing.title }}</h1>
+      <p class="text-gray-400 text-sm mb-4">📍 {{ listing.location }}</p>
+      <p class="text-gray-600 leading-relaxed">{{ listing.description }}</p>
+
+      <div class="mt-6 flex gap-4 text-sm text-gray-500">
+        <span>📅 Available {{ listing.available_from|date:"M j, Y" }}</span>
+        <span>🕐 Posted {{ listing.created_at|timesince }} ago</span>
+      </div>
+
+      <!-- Owner actions -->
+      {% if user == listing.owner %}
+        <div class="mt-6 flex gap-3">
+          <a href="{% url 'listing-edit' listing.pk %}"
+             class="px-4 py-2 rounded-xl border border-gray-200 text-sm hover:border-brand-400 transition">
+            Edit listing
+          </a>
+          <a href="{% url 'listing-delete' listing.pk %}"
+             class="px-4 py-2 rounded-xl border border-red-200 text-red-400 text-sm hover:bg-red-50 transition">
+            Delete
+          </a>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="lg:w-64">
+
+      <!-- Price card -->
+      <div class="bg-white rounded-2xl shadow-sm p-5 mb-4">
+        <p class="text-3xl font-bold text-brand-500">${{ listing.price }}<span class="text-base font-normal text-gray-400">/mo</span></p>
+        {% if user.is_authenticated %}
+          {% if user != listing.owner %}
+            <a href="mailto:{{ listing.owner.email }}"
+               class="mt-4 block text-center bg-brand-500 hover:bg-brand-600 text-white py-2 rounded-xl text-sm transition">
+              Contact landlord
+            </a>
+          {% endif %}
+        {% else %}
+          <a href="{% url 'login' %}?next={{ request.path }}"
+             class="mt-4 block text-center bg-brand-500 hover:bg-brand-600 text-white py-2 rounded-xl text-sm transition">
+            Log in to contact
+          </a>
+        {% endif %}
+      </div>
+
+      <!-- Owner card -->
+      <div class="bg-white rounded-2xl shadow-sm p-5">
+        <p class="text-xs text-gray-400 uppercase tracking-wide mb-3">Posted by</p>
+        <div class="flex items-center gap-3">
+          {% if listing.owner.profile.image %}
+            <img src="{{ listing.owner.profile.image.url }}" alt=""
+                 class="w-10 h-10 rounded-full object-cover"/>
+          {% else %}
+            <div class="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-400 font-bold">
+              {{ listing.owner.username|first|upper }}
+            </div>
+          {% endif %}
+          <div>
+            <p class="font-medium text-sm text-gray-700">{{ listing.owner.username }}</p>
+            {% if listing.owner.profile.is_student %}
+              <p class="text-xs text-brand-500">Student 🎓</p>
+            {% endif %}
+          </div>
+        </div>
+        {% if listing.owner.profile.bio %}
+          <p class="text-xs text-gray-500 mt-3 leading-relaxed">{{ listing.owner.profile.bio|truncatewords:20 }}</p>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
