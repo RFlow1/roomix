@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% block title %}{{ listing.title }} — Roomix{% endblock %}
-
 {% block content %}
 <div class="max-w-3xl mx-auto">
 
@@ -60,6 +59,29 @@
       <!-- Price card -->
       <div class="bg-white rounded-2xl shadow-sm p-5 mb-4">
         <p class="text-3xl font-bold text-brand-500">${{ listing.price }}<span class="text-base font-normal text-gray-400">/mo</span></p>
+
+        <!-- Compatibility score -->
+        {% if user.is_authenticated and user != listing.owner and compatibility %}
+          <div class="mt-3 flex items-center gap-2">
+            {% if compatibility.disqualified %}
+              <span class="text-sm font-medium text-red-400">✗ Must-match conflict</span>
+            {% else %}
+              <div class="flex-1 bg-gray-100 rounded-full h-2">
+                <div class="h-2 rounded-full"
+  style="width: {{ compatibility.score }}%;
+         background-color: {% if compatibility.score >= 75 %}#4ade80{% elif compatibility.score >= 50 %}#facc15{% else %}#f87171{% endif %};">
+</div>
+              <span class="text-sm font-bold
+                {% if compatibility.score >= 75 %}text-green-500
+                {% elif compatibility.score >= 50 %}text-yellow-500
+                {% else %}text-red-400{% endif %}">
+                {{ compatibility.score }}%
+              </span>
+            {% endif %}
+          </div>
+          <p class="text-xs text-gray-400 mt-1">Compatibility match</p>
+        {% endif %}
+
         {% if user.is_authenticated %}
           {% if user != listing.owner %}
             <a href="mailto:{{ listing.owner.email }}"

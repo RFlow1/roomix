@@ -100,6 +100,26 @@
       </div>
     </div>
 
+    <!-- Preference importance -->
+<div class="flex flex-col gap-3">
+  <label class="text-sm font-medium text-gray-700">What matters most to you in a roommate?</label>
+  {% for field, label in importance_fields %}
+    <div class="flex items-center justify-between">
+      <span class="text-sm text-gray-600">{{ label }}</span>
+      <div class="flex gap-2">
+        {% for val, name in importance_choices %}
+          <label class="flex flex-col items-center gap-1 cursor-pointer">
+            <input type="radio" name="{{ field }}" value="{{ val }}"
+                   {% if profile|get_attr:field == val %}checked{% endif %}
+                   class="accent-brand-500"/>
+            <span class="text-xs text-gray-400">{{ name }}</span>
+          </label>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
     <button type="submit"
             class="bg-brand-500 hover:bg-brand-600 text-white py-2.5 rounded-xl font-medium transition">
       Save profile

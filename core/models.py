@@ -33,6 +33,22 @@ class Profile(models.Model):
     image = models.ImageField(upload_to='profile_pics/', default='default_profile.jpg')
     created_at = models.DateTimeField(auto_now_add=True)  
 
+    IMPORTANCE_CHOICES = [
+        (0 , 'Not Important'),
+        (1 , 'Somewhat Important'),
+        (2 , 'Very Important'),
+        (3 , 'Must Match'),
+
+    ]
+    cleanliness_importance = models.IntegerField(choices=IMPORTANCE_CHOICES , default=1)
+    sleep_schedule_importance = models.IntegerField(choices=IMPORTANCE_CHOICES , default=1)
+    budget_importance = models.IntegerField(choices=IMPORTANCE_CHOICES , default=1)
+    smoker_importance = models.IntegerField(choices=IMPORTANCE_CHOICES , default=1)
+    pets_importance = models.IntegerField(choices=IMPORTANCE_CHOICES , default=1)
+    
+
+
+
     def clean(self):
         # Validate budget range makes sense
         if self.budget_min and self.budget_max:
