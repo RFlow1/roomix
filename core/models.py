@@ -91,3 +91,35 @@ class ListingImage(models.Model):
 
     def __str__(self):
         return f"Image for {self.listing.title}"
+    
+
+class Conversation(models.Model):
+    participants = models.ManyToManyField(User , related_name ='conversations')
+    listing = models.ForeignKey(Listing, on_delete=models.SET_NULL , null=True, blank=True,related_name='conversations')
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Conversation about {self.listing} ({self.pk})"
+    
+    def get_other_participant(self , user):
+        return self.participants.exclude(pk=user.pk).first()
+
+    def unread_count(self,user):
+        return self.messages.filter(is_read=False).exclude(sender=user).count()
+
+class Message(models.Model):
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages') 
+    sender = models.ForeignKey(User , on_delete=models.CASCADE , related_name='sent_messages')
+    body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"Message from {self.sender} in conversation {self.conversation.pk}"
+    

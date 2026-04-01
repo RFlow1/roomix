@@ -1,47 +1,76 @@
 <nav class="bg-white shadow-sm sticky top-0 z-50">
-    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-  
-      <!-- Logo -->
-      <a href="{% url 'home' %}" class="text-brand-500 font-bold text-xl tracking-tight">
-        🏠 Roomix
-      </a>
-  
-      <!-- Search bar -->
-      <form method="GET" action="{% url 'home' %}" class="hidden sm:flex items-center gap-2">
-        <input
-          type="text" name="q" value="{{ request.GET.q }}"
-          placeholder="Search by location or title..."
-          class="border border-gray-200 rounded-xl px-4 py-1.5 text-sm w-64
-                 focus:outline-none focus:ring-2 focus:ring-brand-400"
-        />
-        <button type="submit"
-          class="bg-brand-500 hover:bg-brand-600 text-white text-sm px-4 py-1.5 rounded-xl transition">
-          Search
-        </button>
-      </form>
-  
-      <!-- Auth links -->
-      <div class="flex items-center gap-3 text-sm">
-        {% if user.is_authenticated %}
-          <a href="{% url 'listing-create' %}"
-             class="bg-brand-500 hover:bg-brand-600 text-white px-4 py-1.5 rounded-xl transition">
-            + Post listing
-          </a>
-          <a href="{% url 'profile' %}" class="text-gray-600 hover:text-brand-500 transition">
-            {{ user.username }}
-          </a>
-          <form method="POST" action="{% url 'logout' %}">
-            {% csrf_token %}
-            <button type="submit" class="text-gray-400 hover:text-red-400 transition">Logout</button>
-          </form>
-        {% else %}
-          <a href="{% url 'login' %}" class="text-gray-600 hover:text-brand-500 transition">Log in</a>
-          <a href="{% url 'register' %}"
-             class="bg-brand-500 hover:bg-brand-600 text-white px-4 py-1.5 rounded-xl transition">
-            Sign up
-          </a>
-        {% endif %}
-      </div>
-  
+  <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+
+    <!-- Logo -->
+    <a href="{% url 'home' %}" class="text-brand-500 font-bold text-xl tracking-tight">
+      🏠 Roomix
+    </a>
+
+    <!-- Search bar -->
+    <form method="GET" action="{% url 'home' %}" class="hidden sm:flex items-center gap-2">
+      <input
+        type="text" name="q" value="{{ request.GET.q }}"
+        placeholder="Search by location or title..."
+        class="border border-gray-200 rounded-xl px-4 py-1.5 text-sm w-64
+               focus:outline-none focus:ring-2 focus:ring-brand-400"
+      />
+      <button type="submit"
+        class="bg-brand-500 hover:bg-brand-600 text-white text-sm px-4 py-1.5 rounded-xl transition">
+        Search
+      </button>
+    </form>
+
+    <!-- Auth links -->
+    <div class="flex items-center gap-3 text-sm">
+      {% if user.is_authenticated %}
+        <a href="{% url 'listing-create' %}"
+           class="bg-brand-500 hover:bg-brand-600 text-white px-4 py-1.5 rounded-xl transition">
+          + Post listing
+        </a>
+
+        <!-- Inbox with unread badge -->
+        <a href="{% url 'inbox' %}" class="relative text-gray-600 hover:text-brand-500 transition">
+          💬
+          <span id="unread-badge"
+                class="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 hidden">
+            0
+          </span>
+        </a>
+
+        <a href="{% url 'profile' %}" class="text-gray-600 hover:text-brand-500 transition">
+          {{ user.username }}
+        </a>
+        <form method="POST" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="text-gray-400 hover:text-red-400 transition">Logout</button>
+        </form>
+      {% else %}
+        <a href="{% url 'login' %}" class="text-gray-600 hover:text-brand-500 transition">Log in</a>
+        <a href="{% url 'register' %}"
+           class="bg-brand-500 hover:bg-brand-600 text-white px-4 py-1.5 rounded-xl transition">
+          Sign up
+        </a>
+      {% endif %}
     </div>
-  </nav>
+  </div>
+</nav>
+
+{% if user.is_authenticated %}
+<script>
+  function pollUnread() {
+    fetch("{% url 'unread-count' %}")
+      .then(res => res.json())
+      .then(data => {
+        const badge = document.getElementById('unread-badge');
+        if (data.unread > 0) {
+          badge.textContent = data.unread;
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+      });
+  }
+  pollUnread();
+  setInterval(pollUnread, 10000); // poll every 10 seconds
+</script>
+{% endif %}

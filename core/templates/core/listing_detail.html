@@ -83,12 +83,19 @@
         {% endif %}
 
         {% if user.is_authenticated %}
-          {% if user != listing.owner %}
-            <a href="mailto:{{ listing.owner.email }}"
-               class="mt-4 block text-center bg-brand-500 hover:bg-brand-600 text-white py-2 rounded-xl text-sm transition">
-              Contact landlord
-            </a>
-          {% endif %}
+        {% if user != listing.owner %}
+        <form method="POST" action="{% url 'start-conversation' listing.pk %}" class="mt-4">
+          {% csrf_token %}
+          <input type="text" name="body"
+                 placeholder="Write an opening message..."
+                 class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm mb-2
+                        focus:outline-none focus:ring-2 focus:ring-brand-400"/>
+          <button type="submit"
+                  class="w-full text-center bg-brand-500 hover:bg-brand-600 text-white py-2 rounded-xl text-sm transition">
+            Send message
+          </button>
+        </form>
+      {% endif %}
         {% else %}
           <a href="{% url 'login' %}?next={{ request.path }}"
              class="mt-4 block text-center bg-brand-500 hover:bg-brand-600 text-white py-2 rounded-xl text-sm transition">

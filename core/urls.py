@@ -15,4 +15,11 @@ urlpatterns = [
     # Auth
     path('accounts/register/', views.RegisterView.as_view(), name='register'),
     path('profile/', views.ProfileView.as_view(), name='profile'),
+
+    #Messaging
+    path('messages/' , views.InboxView.as_view(), name='inbox'),
+    path('messages/<int:pk>/', views.ConversationView.as_view(), name='conversation'),
+    path('messages/start/<int:listing_pk>/', views.StartConversationView.as_view(), name='start-conversation'),
+    path('messages/unread/', views.UnreadCountView.as_view(), name='unread-count'),
+    path('messages/<int:pk>/poll/', views.PollMessagesView.as_view(), name='poll-messages'),
 ]

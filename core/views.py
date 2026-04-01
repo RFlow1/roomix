@@ -5,9 +5,11 @@ from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.shortcuts import render, redirect
-from .models import Listing, Profile, ListingImage
+from .models import Listing, Profile, ListingImage, Conversation, Message
 from .utils import compatibility_score
 from django.contrib import messages
+from django.http import JsonResponse
+
 
 
 class ListingListView(ListView):
@@ -160,3 +162,105 @@ class ProfileView(LoginRequiredMixin, View):
         profile.save()
         messages.success(request, 'Profile updated!')
         return redirect('profile')
+    
+
+class InboxView(LoginRequiredMixin, View):
+    def get(self, request):
+        conversations = Conversation.objects.filter(
+            participants=request.user
+        ).prefetch_related('participants', 'listing', 'messages')
+        
+        convo_data = []
+        for convo in conversations:
+            convo_data.append({
+                'conversation': convo,
+                'other_user': convo.get_other_participant(request.user),
+                'unread': convo.unread_count(request.user),
+                'last_message': convo.messages.last(),
+            })
+        
+        return render(request, 'core/inbox.html', {'convo_data': convo_data})
+class ConversationView(LoginRequiredMixin , View):
+    def get(self, request, pk):
+        conversation = Conversation.objects.get(pk=pk)
+        if request.user not in conversation.participants.all():
+            return redirect('inbox')
+        conversation.messages.filter(is_read=False).exclude(sender=request.user).update(is_read=True)
+        messages_qs = conversation.messages.all()
+        return render(request, 'core/conversation.html' , {
+            'conversation': conversation,
+            'messages': messages_qs,
+            'other_user': conversation.get_other_participant(request.user),
+
+        })
+    def post(self, request, pk):
+        conversation = Conversation.objects.get(pk=pk)
+        if request.user not in conversation.participants.all():
+            return redirect('inbox')
+        body = request.POST.get('body', '').strip()
+        if body:
+            Message.objects.create(
+                conversation=conversation,
+                sender=request.user,
+                body=body
+            )
+        return redirect('conversation', pk=pk)
+
+class PollMessagesView(LoginRequiredMixin , View):
+    def get(self, request , pk):
+        conversation = Conversation.objects.get(pk=pk)
+        if request.user not in conversation.participants.all():
+            return JsonResponse({'error': 'Forbidden'}, status=403)
+        after = request.GET.get('after')
+        messages_qs = conversation.messages.all()
+        if after:
+            messages_qs = messages_qs.filter(pk__gt=after)
+        
+        messages_qs.filter(is_read=False).exclude(sender=request.user).update(is_read=True)
+        data = [
+            {
+                'pk': m.pk,
+                'sender': m.sender.username,
+                'body': m.body , 
+                'created_at' : m.created_at.strftime('%b %d, %Y %I:%M %p'),
+                'is_mine' : m.sender == request.user,
+            }
+            for m in messages_qs
+        ]
+        return JsonResponse({'messages': data})
+
+class UnreadCountView(LoginRequiredMixin, View):
+    def get(self, request):
+        count = Message.objects.filter(
+            conversation__participants=request.user,
+            is_read=False
+        ).exclude(sender=request.user).count()
+        return JsonResponse({'unread': count})
+    
+class StartConversationView(LoginRequiredMixin, View):
+    def post(self, request, listing_pk):
+        listing = Listing.objects.get(pk=listing_pk)
+        if listing.owner == request.user:
+            return redirect('listing-detail', pk=listing_pk)
+        # Check if conversation already exists
+        existing = Conversation.objects.filter(
+            participants=request.user
+        ).filter(
+            participants=listing.owner
+        ).filter(
+            listing=listing
+        ).first()
+        if existing:
+            return redirect('conversation', pk=existing.pk)
+        # Create new conversation
+        conversation = Conversation.objects.create(listing=listing)
+        conversation.participants.add(request.user, listing.owner)
+        # Add opening message if provided
+        body = request.POST.get('body', '').strip()
+        if body:
+            Message.objects.create(
+                conversation=conversation,
+                sender=request.user,
+                body=body
+            )
+        return redirect('conversation', pk=conversation.pk)
