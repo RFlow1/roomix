@@ -11,11 +11,12 @@
         extend: {
           colors: {
             brand: {
-              50:  '#fdf6f0',
-              100: '#fde8d8',
-              400: '#f4845f',
-              500: '#ef6c45',
-              600: '#e05530',
+              50:  '#eff6ff',
+              100: '#dbeafe',
+              400: '#60a5fa',
+              500: '#2563eb',
+              600: '#1d4ed8',
+              700: '#1e40af',
             }
           },
           borderRadius: { xl: '1rem', '2xl': '1.5rem' }
@@ -24,11 +25,9 @@
     }
   </script>
 </head>
-<body class="bg-brand-50 text-gray-800 min-h-screen flex flex-col">
-
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
   {% include "includes/_navbar.html" %}
 
-  <!-- Flash messages -->
   {% if messages %}
     <div class="max-w-5xl mx-auto w-full px-4 pt-4 space-y-2">
       {% for message in messages %}
@@ -42,12 +41,50 @@
     </div>
   {% endif %}
 
-  <main class="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
+  <main class="flex-1">
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="text-center text-xs text-gray-400 py-6">
-    © 2025 Roomix — Find your perfect roommate
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-300 mt-16">
+    <div class="max-w-5xl mx-auto px-4 py-12 grid grid-cols-1 sm:grid-cols-4 gap-8">
+      <!-- Brand -->
+      <div class="sm:col-span-1">
+        <p class="text-white font-bold text-xl mb-2">RoomiX</p>
+        <p class="text-sm text-gray-400 leading-relaxed">Your trusted platform for finding apartments and compatible roommates in Texarkana, Texas. Making the search simple, smart, and stress-free.</p>
+        <p class="text-sm text-gray-400 mt-3">📍 Texarkana, TX 75503</p>
+      </div>
+      <!-- Explore -->
+      <div>
+        <p class="text-white font-semibold mb-3">Explore</p>
+        <ul class="space-y-2 text-sm">
+          <li><a href="{% url 'home' %}" class="hover:text-white transition">Home</a></li>
+          <li><a href="{% url 'listing-list' %}" class="hover:text-white transition">Browse Listings</a></li>
+        </ul>
+      </div>
+      <!-- Account -->
+      <div>
+        <p class="text-white font-semibold mb-3">Account</p>
+        <ul class="space-y-2 text-sm">
+          {% if user.is_authenticated %}
+            <li><a href="{% url 'profile' %}" class="hover:text-white transition">Profile</a></li>
+            <li><a href="{% url 'inbox' %}" class="hover:text-white transition">Messages</a></li>
+          {% else %}
+            <li><a href="{% url 'login' %}" class="hover:text-white transition">Login</a></li>
+            <li><a href="{% url 'register' %}" class="hover:text-white transition">Register</a></li>
+          {% endif %}
+        </ul>
+      </div>
+      <!-- About -->
+      <div>
+        <p class="text-white font-semibold mb-3">About RoomiX</p>
+        <p class="text-sm text-gray-400 leading-relaxed">RoomiX helps Texarkana residents find affordable housing and compatible roommates based on lifestyle, budget, and preferences. Browse verified listings and connect with your ideal living situation.</p>
+        <p class="text-sm text-gray-400 mt-2">✉️ hello@roomix.com</p>
+      </div>
+    </div>
+    <div class="border-t border-gray-800 py-4 text-center text-xs text-gray-500">
+      © 2026 RoomiX — Texarkana, TX 75503. Built with Django & Tailwind.
+    </div>
   </footer>
 
 </body>

@@ -1,74 +1,109 @@
 {% extends "base.html" %}
-{% block title %}My Profile — Roomix{% endblock %}
+{% block title %}My Profile — RoomiX{% endblock %}
 {% load core_extras %}
 
 {% block content %}
-<div class="max-w-xl mx-auto">
-  <h1 class="text-2xl font-bold text-gray-800 mb-6">Your profile</h1>
+<div class="max-w-2xl mx-auto px-4 py-8">
 
-  <form method="POST" enctype="multipart/form-data"
-        class="bg-white rounded-2xl shadow-sm p-6 flex flex-col gap-5">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">My Profile</h1>
+    <p class="text-gray-400 mt-1">Update your info and set your roommate preferences</p>
+  </div>
+
+  <form method="POST" enctype="multipart/form-data" class="flex flex-col gap-6">
     {% csrf_token %}
 
-    <!-- Avatar -->
-    <div class="flex items-center gap-4">
-      {% if profile.image %}
-        <img src="{{ profile.image.url }}" alt="Your photo"
-             class="w-16 h-16 rounded-full object-cover"/>
-      {% else %}
-        <div class="w-16 h-16 rounded-full bg-brand-100 flex items-center justify-center text-2xl text-brand-400 font-bold">
-          {{ request.user.username|first|upper }}
+    <!-- Avatar card -->
+    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Profile Photo</h2>
+      <div class="flex items-center gap-5">
+        {% if profile.image %}
+          <img src="{{ profile.image.url }}" alt="Your photo"
+               class="w-20 h-20 rounded-full object-cover border-4 border-brand-100"/>
+        {% else %}
+          <div class="w-20 h-20 rounded-full bg-brand-100 flex items-center justify-center text-3xl text-brand-500 font-bold border-4 border-brand-100">
+            {{ request.user.username|first|upper }}
+          </div>
+        {% endif %}
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-1">Upload a new photo</p>
+          <input type="file" name="image" accept="image/*"
+                 class="text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-4 file:rounded-xl
+                        file:border-0 file:bg-brand-500 file:text-white hover:file:bg-brand-600 file:cursor-pointer"/>
         </div>
-      {% endif %}
-      <div>
-        <label class="text-sm font-medium text-gray-700 block mb-1">Profile photo</label>
-        <input type="file" name="image" accept="image/*"
-               class="text-xs text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded-xl
-                      file:border-0 file:bg-brand-100 file:text-brand-600 hover:file:bg-brand-200"/>
       </div>
     </div>
 
-    <!-- Bio -->
-    <div class="flex flex-col gap-1">
-      <label class="text-sm font-medium text-gray-700">Bio</label>
-      <textarea name="bio" rows="3"
-                class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 resize-none"
-                placeholder="Tell potential roommates a little about yourself...">{{ profile.bio }}</textarea>
+    <!-- Basic info card -->
+    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Basic Info</h2>
+
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-gray-700">Bio</label>
+          <textarea name="bio" rows="3"
+                    class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
+                    placeholder="Tell potential roommates a little about yourself...">{{ profile.bio }}</textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-gray-700">Location</label>
+            <input type="text" name="location" value="{{ profile.location }}"
+                   placeholder="Texarkana, TX"
+                   class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"/>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-gray-700">Age</label>
+            <input type="number" name="age" value="{{ profile.age|default:'' }}"
+                   class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"/>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-gray-700">Budget min ($)</label>
+            <input type="number" name="budget_min" value="{{ profile.budget_min|default:'' }}"
+                   class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"/>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-gray-700">Budget max ($)</label>
+            <input type="number" name="budget_max" value="{{ profile.budget_max|default:'' }}"
+                   class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"/>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-gray-700">Sleep schedule</label>
+            <select name="sleep_schedule"
+                    class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+              <option value="">— select —</option>
+              <option value="early" {% if profile.sleep_schedule == 'early' %}selected{% endif %}>🌅 Early bird</option>
+              <option value="night" {% if profile.sleep_schedule == 'night' %}selected{% endif %}>🌙 Night owl</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-gray-700">Cleanliness</label>
+            <select name="cleanliness"
+                    class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+              <option value="">— select —</option>
+              {% for val, label in profile.CLEANLINESS_CHOICES %}
+                <option value="{{ val }}" {% if profile.cleanliness == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Location + budget row -->
-    <div class="grid grid-cols-2 gap-4">
-      <div class="flex flex-col gap-1">
-        <label class="text-sm font-medium text-gray-700">Location</label>
-        <input type="text" name="location" value="{{ profile.location }}"
-               class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"/>
-      </div>
-      <div class="flex flex-col gap-1">
-        <label class="text-sm font-medium text-gray-700">Age</label>
-        <input type="number" name="age" value="{{ profile.age|default:'' }}"
-               class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"/>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-2 gap-4">
-      <div class="flex flex-col gap-1">
-        <label class="text-sm font-medium text-gray-700">Budget min ($)</label>
-        <input type="number" name="budget_min" value="{{ profile.budget_min|default:'' }}"
-               class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"/>
-      </div>
-      <div class="flex flex-col gap-1">
-        <label class="text-sm font-medium text-gray-700">Budget max ($)</label>
-        <input type="number" name="budget_max" value="{{ profile.budget_max|default:'' }}"
-               class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"/>
-      </div>
-    </div>
-
-    <!-- Lifestyle toggles -->
-    <div class="flex flex-col gap-2">
-      <label class="text-sm font-medium text-gray-700">Lifestyle</label>
-      <div class="flex flex-wrap gap-4 text-sm text-gray-600">
+    <!-- Lifestyle card -->
+    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Lifestyle</h2>
+      <div class="flex flex-wrap gap-6">
         {% for name, label in lifestyle_fields %}
-          <label class="flex items-center gap-2 cursor-pointer">
+          <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
             <input type="checkbox" name="{{ name }}" {% if profile|get_attr:name %}checked{% endif %}
                    class="accent-brand-500 w-4 h-4"/>
             {{ label }}
@@ -77,52 +112,37 @@
       </div>
     </div>
 
-    <!-- Sleep + cleanliness -->
-    <div class="grid grid-cols-2 gap-4">
-      <div class="flex flex-col gap-1">
-        <label class="text-sm font-medium text-gray-700">Sleep schedule</label>
-        <select name="sleep_schedule"
-                class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400">
-          <option value="">— select —</option>
-          <option value="early" {% if profile.sleep_schedule == 'early' %}selected{% endif %}>Early bird</option>
-          <option value="night" {% if profile.sleep_schedule == 'night' %}selected{% endif %}>Night owl</option>
-        </select>
-      </div>
-      <div class="flex flex-col gap-1">
-        <label class="text-sm font-medium text-gray-700">Cleanliness</label>
-        <select name="cleanliness"
-                class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400">
-          <option value="">— select —</option>
-          {% for val, label in profile.CLEANLINESS_CHOICES %}
-            <option value="{{ val }}" {% if profile.cleanliness == val %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-      </div>
-    </div>
+    <!-- Preferences importance card -->
+    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-1">What Matters Most to You?</h2>
+      <p class="text-xs text-gray-400 mb-5">These weights are used to calculate your compatibility score with other users.</p>
 
-    <!-- Preference importance -->
-<div class="flex flex-col gap-3">
-  <label class="text-sm font-medium text-gray-700">What matters most to you in a roommate?</label>
-  {% for field, label in importance_fields %}
-    <div class="flex items-center justify-between">
-      <span class="text-sm text-gray-600">{{ label }}</span>
-      <div class="flex gap-2">
-        {% for val, name in importance_choices %}
-          <label class="flex flex-col items-center gap-1 cursor-pointer">
-            <input type="radio" name="{{ field }}" value="{{ val }}"
-                   {% if profile|get_attr:field == val %}checked{% endif %}
-                   class="accent-brand-500"/>
-            <span class="text-xs text-gray-400">{{ name }}</span>
-          </label>
+      <div class="flex flex-col gap-5">
+        {% for field, label in importance_fields %}
+          <div>
+            <p class="text-sm font-medium text-gray-700 mb-2">{{ label }}</p>
+            <div class="grid grid-cols-4 gap-2">
+              {% for val, name in importance_choices %}
+                <label class="cursor-pointer">
+                  <input type="radio" name="{{ field }}" value="{{ val }}"
+                         {% if profile|get_attr:field == val %}checked{% endif %}
+                         class="sr-only peer"/>
+                  <div class="text-center text-xs border border-gray-200 rounded-xl py-2 px-1
+                              peer-checked:bg-brand-500 peer-checked:text-white peer-checked:border-brand-500
+                              hover:border-brand-400 transition cursor-pointer">
+                    {{ name }}
+                  </div>
+                </label>
+              {% endfor %}
+            </div>
+          </div>
         {% endfor %}
       </div>
     </div>
-  {% endfor %}
-</div>
 
     <button type="submit"
-            class="bg-brand-500 hover:bg-brand-600 text-white py-2.5 rounded-xl font-medium transition">
-      Save profile
+            class="bg-brand-500 hover:bg-brand-600 text-white py-3 rounded-xl font-semibold transition text-sm">
+      Save Profile
     </button>
 
   </form>

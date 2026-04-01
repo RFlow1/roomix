@@ -1,87 +1,222 @@
 {% extends "base.html" %}
 {% load core_extras %}
-{% block title %}Find a Room — Roomix{% endblock %}
+{% block title %}Find Your Perfect Apartment & Roommate — RoomiX{% endblock %}
 
 {% block content %}
 
-  <!-- Hero -->
-  <div class="text-center py-10">
-    <h1 class="text-4xl font-bold text-gray-800 mb-2">Find your perfect room 🏠</h1>
-    <p class="text-gray-500 text-lg">Browse student-friendly rooms and find great roommates</p>
+{% if not request.GET.q %}
+<!-- Hero Section -->
+<div class="bg-brand-500 text-white">
+  <div class="max-w-5xl mx-auto px-4 py-16 flex flex-col lg:flex-row items-center gap-10">
+
+    <!-- Left -->
+    <div class="flex-1">
+      <div class="inline-flex items-center gap-2 bg-blue-600 text-blue-100 text-xs px-3 py-1 rounded-full mb-6">
+        📍 Texarkana, TX 75503
+      </div>
+      <h1 class="text-4xl sm:text-5xl font-extrabold leading-tight mb-4">
+        Find Your Perfect<br/>
+        <span class="text-blue-200">Apartment</span> &
+        <span class="text-blue-300">Roommate</span>
+      </h1>
+      <p class="text-blue-100 text-lg mb-8 leading-relaxed">
+        Browse verified apartment listings in Texarkana and match with compatible roommates based on your lifestyle, budget, and preferences.
+      </p>
+
+      <!-- Search -->
+      <form method="GET" class="flex gap-2 mb-6">
+        <div class="flex-1 flex items-center bg-white rounded-xl px-4 gap-2">
+          <span class="text-gray-400">🔍</span>
+          <input type="text" name="q" value="{{ request.GET.q }}"
+                 placeholder="Search by name, address, or keyword..."
+                 class="flex-1 py-3 text-gray-800 text-sm focus:outline-none"/>
+        </div>
+        <button type="submit"
+                class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-xl font-semibold transition">
+          Search
+        </button>
+      </form>
+
+      <!-- Filter chips -->
+      <div class="flex flex-wrap gap-2 text-sm">
+        <a href="?q=1+bedroom" class="bg-white bg-opacity-10 hover:bg-opacity-20 text-white border border-blue-300 px-3 py-1 rounded-full transition">1 Bedroom</a>
+        <a href="?q=2+bedroom" class="bg-white bg-opacity-10 hover:bg-opacity-20 text-white border border-blue-300 px-3 py-1 rounded-full transition">2 Bedrooms</a>
+        <a href="?q=no+smoking" class="bg-white bg-opacity-10 hover:bg-opacity-20 text-white border border-blue-300 px-3 py-1 rounded-full transition">🚭 No Smoking</a>
+        <a href="?max_price=700" class="bg-white bg-opacity-10 hover:bg-opacity-20 text-white border border-blue-300 px-3 py-1 rounded-full transition">Under $700</a>
+      </div>
+
+      <!-- Stats -->
+      <div class="flex gap-8 mt-8">
+        <div>
+          <p class="text-2xl font-extrabold">{{ paginator.count }}+</p>
+          <p class="text-blue-200 text-xs uppercase tracking-wide">Active Listings</p>
+        </div>
+        <div>
+          <p class="text-2xl font-extrabold">100%</p>
+          <p class="text-blue-200 text-xs uppercase tracking-wide">Texarkana, TX</p>
+        </div>
+        <div>
+          <p class="text-2xl font-extrabold">Free</p>
+          <p class="text-blue-200 text-xs uppercase tracking-wide">To Browse</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right — Featured listing card -->
+    {% with listings.0 as featured %}
+    {% if featured %}
+    <div class="lg:w-80 bg-white bg-opacity-10 rounded-2xl p-4 backdrop-blur border border-blue-400">
+      <div class="h-40 bg-blue-400 bg-opacity-30 rounded-xl flex items-center justify-center text-5xl mb-4">
+        {% with featured.images.first as img %}
+          {% if img %}
+            <img src="{{ img.image.url }}" alt="{{ featured.title }}"
+                 class="w-full h-full object-cover rounded-xl"/>
+          {% else %}
+            🏠
+          {% endif %}
+        {% endwith %}
+      </div>
+      <p class="text-blue-200 text-xs uppercase tracking-wide font-semibold mb-1">Featured Listing</p>
+      <p class="text-white font-bold text-lg leading-snug">{{ featured.title }}</p>
+      <p class="text-blue-200 text-xs mb-2">📍 {{ featured.location }}</p>
+      <p class="text-white font-extrabold text-xl">${{ featured.price }}<span class="text-blue-200 text-sm font-normal">/mo</span></p>
+      {% if user.is_authenticated and scores %}
+        {% with scores|get_item:featured.pk as compat %}
+          {% if compat and not compat.disqualified %}
+            <div class="mt-2 bg-blue-600 bg-opacity-50 rounded-lg px-3 py-2">
+              <p class="text-blue-200 text-xs uppercase tracking-wide mb-1">Compatibility Match</p>
+              <p class="text-white font-bold">{{ compat.score }}%</p>
+            </div>
+          {% endif %}
+        {% endwith %}
+      {% endif %}
+      <a href="{{ featured.get_absolute_url }}"
+         class="mt-3 block text-center bg-white text-brand-500 font-semibold py-2 rounded-xl text-sm hover:bg-blue-50 transition">
+        View Listing →
+      </a>
+    </div>
+    {% endif %}
+    {% endwith %}
+
   </div>
+</div>
 
-  <!-- Mobile search -->
-  <form method="GET" class="sm:hidden flex gap-2 mb-6">
-    <input type="text" name="q" value="{{ request.GET.q }}"
-           placeholder="Search location or title..."
-           class="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"/>
-    <button type="submit"
-            class="bg-brand-500 text-white px-4 py-2 rounded-xl text-sm">Search</button>
-  </form>
+<!-- How RoomiX Works -->
+<div class="bg-white py-16">
+  <div class="max-w-5xl mx-auto px-4 text-center">
+    <h2 class="text-3xl font-bold text-gray-800 mb-2">How RoomiX Works</h2>
+    <div class="w-12 h-1 bg-brand-500 mx-auto mb-3 rounded-full"></div>
+    <p class="text-gray-500 mb-12">Find your perfect apartment in three simple steps</p>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-10">
+      <div class="flex flex-col items-center">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-3xl mb-4">🔍</div>
+        <h3 class="font-bold text-gray-800 mb-2">1. Browse Listings</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">Explore verified apartment listings in Texarkana with detailed photos, pricing, and amenities.</p>
+      </div>
+      <div class="flex flex-col items-center">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-3xl mb-4">⚙️</div>
+        <h3 class="font-bold text-gray-800 mb-2">2. Set Your Preferences</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">Tell us your budget, hygiene level, interests, and house rules. We'll match you with compatible listings.</p>
+      </div>
+      <div class="flex flex-col items-center">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-3xl mb-4">🏠</div>
+        <h3 class="font-bold text-gray-800 mb-2">3. Find Your Home</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">Save your favorites, compare options, and move into your perfect Texarkana home.</p>
+      </div>
+    </div>
+  </div>
+</div>
 
-  <!-- Result count -->
-  {% if request.GET.q %}
-    <p class="text-sm text-gray-500 mb-4">
-      Showing results for <span class="font-medium text-gray-700">"{{ request.GET.q }}"</span>
-      — {{ paginator.count }} listing{{ paginator.count|pluralize }}
-      <a href="{% url 'home' %}" class="ml-2 text-brand-500 hover:underline">Clear</a>
-    </p>
-  {% endif %}
+<!-- Featured Listings Header -->
+<div class="max-w-5xl mx-auto px-4 pt-12 pb-4 text-center">
+  <h2 class="text-3xl font-bold text-gray-800 mb-2">Featured Listings</h2>
+  <div class="w-12 h-1 bg-brand-500 mx-auto mb-3 rounded-full"></div>
+  <p class="text-gray-500">Hand-picked apartments available right now in Texarkana, TX</p>
+</div>
 
-  <!-- Grid -->
+{% endif %}
+
+<!-- Search results header -->
+{% if request.GET.q %}
+<div class="max-w-5xl mx-auto px-4 pt-8 pb-4">
+  <p class="text-sm text-gray-500">
+    Showing results for <span class="font-medium text-gray-700">"{{ request.GET.q }}"</span>
+    — {{ paginator.count }} listing{{ paginator.count|pluralize }}
+    <a href="{% url 'home' %}" class="ml-2 text-brand-500 hover:underline">Clear</a>
+  </p>
+</div>
+{% endif %}
+
+<!-- Listings Grid -->
+<div class="max-w-5xl mx-auto px-4 pb-16">
   {% if listings %}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {% for item in listings %}
-        <a href="{{ item.get_absolute_url }}"
-           class="bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden group flex flex-col">
+        <div class="bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden flex flex-col relative">
+
+          <!-- Available badge -->
+          <div class="absolute top-3 left-3 z-10">
+            <span class="bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-full">AVAILABLE</span>
+          </div>
 
           <!-- Image -->
-          <div class="h-48 bg-brand-100 overflow-hidden">
+          <div class="h-48 bg-blue-50 overflow-hidden flex items-center justify-center">
             {% with item.images.first as img %}
               {% if img %}
                 <img src="{{ img.image.url }}" alt="{{ item.title }}"
-                     class="w-full h-full object-cover group-hover:scale-105 transition duration-300"/>
+                     class="w-full h-full object-cover"/>
               {% else %}
-                <div class="w-full h-full flex items-center justify-center text-brand-400 text-4xl">🏠</div>
+                <span class="text-5xl">🏠</span>
               {% endif %}
             {% endwith %}
           </div>
 
           <!-- Info -->
-<div class="p-4 flex flex-col gap-1 flex-1">
-  <div class="flex items-start justify-between gap-2">
-    <h3 class="font-semibold text-gray-800 text-sm leading-snug line-clamp-2 group-hover:text-brand-500 transition">
-      {{ item.title }}
-    </h3>
-    <span class="text-brand-500 font-bold text-sm whitespace-nowrap">${{ item.price }}/mo</span>
-  </div>
+          <div class="p-4 flex flex-col gap-2 flex-1">
+            <p class="text-brand-500 font-extrabold text-xl">${{ item.price }}<span class="text-gray-400 text-sm font-normal">/mo</span></p>
+            <h3 class="font-semibold text-gray-800 text-sm leading-snug">{{ item.title }}</h3>
+            <p class="text-xs text-gray-400">📍 {{ item.location }}</p>
 
-  <!-- Compatibility badge -->
-  {% if user.is_authenticated and scores %}
-    {% with scores|get_item:item.pk as compat %}
-      {% if compat %}
-        {% if compat.disqualified %}
-          <span class="text-xs font-medium text-red-400">✗ Must-match conflict</span>
-        {% else %}
-          <span class="text-xs font-medium
-            {% if compat.score >= 75 %}text-green-500
-            {% elif compat.score >= 50 %}text-yellow-500
-            {% else %}text-red-400{% endif %}">
-            ★ {{ compat.score }}% match
-          </span>
-        {% endif %}
-      {% endif %}
-    {% endwith %}
-  {% endif %}
+            <!-- Compatibility badge -->
+            {% if user.is_authenticated and scores %}
+              {% with scores|get_item:item.pk as compat %}
+                {% if compat %}
+                  {% if compat.disqualified %}
+                    <span class="text-xs font-medium text-red-400">✗ Must-match conflict</span>
+                  {% else %}
+                    <span class="text-xs font-medium"
+                      style="color: {% if compat.score >= 75 %}#22c55e{% elif compat.score >= 50 %}#eab308{% else %}#f87171{% endif %};">
+                      ★ {{ compat.score }}% match
+                    </span>
+                  {% endif %}
+                {% endif %}
+              {% endwith %}
+            {% endif %}
 
-  <p class="text-xs text-gray-400">📍 {{ item.location }}</p>
-  <p class="text-xs text-gray-400 mt-auto pt-2 border-t border-gray-100">
-    Available {{ item.available_from|date:"M j, Y" }} · {{ item.owner.username }}
-  </p>
-</div>
-        </a>
+            <!-- Tags -->
+            <div class="flex flex-wrap gap-1 mt-1">
+              {% if not item.owner.profile.is_smoker %}
+                <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">🚭 No Smoking</span>
+              {% endif %}
+              {% if item.owner.profile.sleep_schedule == 'early' %}
+                <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">🌅 Early Bird</span>
+              {% elif item.owner.profile.sleep_schedule == 'night' %}
+                <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">🌙 Night Owl</span>
+              {% endif %}
+              {% if not item.owner.profile.has_pets %}
+                <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">🐾 No Pets</span>
+              {% endif %}
+            </div>
+
+            <a href="{{ item.get_absolute_url }}"
+               class="mt-auto block text-center bg-brand-500 hover:bg-brand-600 text-white py-2 rounded-xl text-sm font-semibold transition">
+              View Details →
+            </a>
+          </div>
+        </div>
       {% endfor %}
     </div>
+
   {% else %}
     <div class="text-center py-24 text-gray-400">
       <p class="text-5xl mb-4">🔍</p>
@@ -112,5 +247,25 @@
       {% endif %}
     </div>
   {% endif %}
+
+  <!-- CTA Banner -->
+  {% if not user.is_authenticated %}
+  <div class="mt-16 bg-brand-500 rounded-2xl p-10 text-center text-white">
+    <h2 class="text-3xl font-bold mb-2">Ready to Find Your Home?</h2>
+    <p class="text-blue-100 mb-6">Create a free account to save listings, set preferences, and get personalized matches.</p>
+    <div class="flex justify-center gap-4 flex-wrap">
+      <a href="{% url 'register' %}"
+         class="bg-white text-brand-500 font-semibold px-6 py-3 rounded-xl hover:bg-blue-50 transition flex items-center gap-2">
+        👤 Create Free Account
+      </a>
+      <a href="{% url 'listing-list' %}"
+         class="border border-white text-white font-semibold px-6 py-3 rounded-xl hover:bg-blue-600 transition">
+        Browse Listings
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
 
 {% endblock %}

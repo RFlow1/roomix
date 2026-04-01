@@ -1,15 +1,26 @@
 {% extends "base.html" %}
-{% block title %}{{ listing.title }} — Roomix{% endblock %}
+{% block title %}{{ listing.title }} — RoomiX{% endblock %}
+
 {% block content %}
-<div class="max-w-3xl mx-auto">
+<div class="max-w-4xl mx-auto px-4 py-8">
+
+  <!-- Breadcrumb -->
+  <div class="text-sm text-gray-400 mb-6">
+    <a href="{% url 'home' %}" class="hover:text-brand-500 transition">Home</a>
+    <span class="mx-2">›</span>
+    <a href="{% url 'listing-list' %}" class="hover:text-brand-500 transition">Browse Listings</a>
+    <span class="mx-2">›</span>
+    <span class="text-gray-600">{{ listing.title }}</span>
+  </div>
 
   <!-- Image gallery -->
-  <div class="rounded-2xl overflow-hidden bg-brand-100 h-72 mb-6">
+  <div class="rounded-2xl overflow-hidden bg-blue-50 h-72 mb-4 relative">
+    <span class="absolute top-4 left-4 z-10 bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-full">AVAILABLE</span>
     {% with listing.images.first as img %}
       {% if img %}
         <img src="{{ img.image.url }}" alt="{{ listing.title }}" class="w-full h-full object-cover"/>
       {% else %}
-        <div class="w-full h-full flex items-center justify-center text-6xl text-brand-300">🏠</div>
+        <div class="w-full h-full flex items-center justify-center text-6xl text-blue-200">🏠</div>
       {% endif %}
     {% endwith %}
   </div>
@@ -18,7 +29,7 @@
   {% if listing.images.count > 1 %}
     <div class="grid grid-cols-3 gap-3 mb-6">
       {% for img in listing.images.all|slice:"1:4" %}
-        <div class="h-28 rounded-xl overflow-hidden bg-brand-100">
+        <div class="h-28 rounded-xl overflow-hidden bg-blue-50">
           <img src="{{ img.image.url }}" alt="" class="w-full h-full object-cover"/>
         </div>
       {% endfor %}
@@ -29,11 +40,35 @@
 
     <!-- Main info -->
     <div class="flex-1">
+      <p class="text-brand-500 font-extrabold text-3xl mb-1">
+        ${{ listing.price }}<span class="text-gray-400 text-base font-normal">/mo</span>
+      </p>
       <h1 class="text-2xl font-bold text-gray-800 mb-1">{{ listing.title }}</h1>
-      <p class="text-gray-400 text-sm mb-4">📍 {{ listing.location }}</p>
-      <p class="text-gray-600 leading-relaxed">{{ listing.description }}</p>
+      <p class="text-gray-400 text-sm mb-6">📍 {{ listing.location }}</p>
 
-      <div class="mt-6 flex gap-4 text-sm text-gray-500">
+      <!-- Tags -->
+      <div class="flex flex-wrap gap-2 mb-6">
+        {% if not listing.owner.profile.is_smoker %}
+          <span class="text-sm bg-gray-100 text-gray-600 px-3 py-1 rounded-full">🚭 No Smoking</span>
+        {% endif %}
+        {% if listing.owner.profile.sleep_schedule == 'early' %}
+          <span class="text-sm bg-gray-100 text-gray-600 px-3 py-1 rounded-full">🌅 Early Bird</span>
+        {% elif listing.owner.profile.sleep_schedule == 'night' %}
+          <span class="text-sm bg-gray-100 text-gray-600 px-3 py-1 rounded-full">🌙 Night Owl</span>
+        {% endif %}
+        {% if not listing.owner.profile.has_pets %}
+          <span class="text-sm bg-gray-100 text-gray-600 px-3 py-1 rounded-full">🐾 No Pets</span>
+        {% endif %}
+        {% if listing.owner.profile.cleanliness %}
+          <span class="text-sm bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
+            ⭐ Hygiene {{ listing.owner.profile.cleanliness }}/3
+          </span>
+        {% endif %}
+      </div>
+
+      <p class="text-gray-600 leading-relaxed mb-6">{{ listing.description }}</p>
+
+      <div class="flex gap-6 text-sm text-gray-500 border-t border-gray-100 pt-4">
         <span>📅 Available {{ listing.available_from|date:"M j, Y" }}</span>
         <span>🕐 Posted {{ listing.created_at|timesince }} ago</span>
       </div>
@@ -54,77 +89,79 @@
     </div>
 
     <!-- Sidebar -->
-    <div class="lg:w-64">
+    <div class="lg:w-72 flex flex-col gap-4">
 
-      <!-- Price card -->
-      <div class="bg-white rounded-2xl shadow-sm p-5 mb-4">
-        <p class="text-3xl font-bold text-brand-500">${{ listing.price }}<span class="text-base font-normal text-gray-400">/mo</span></p>
+      <!-- Price + Compatibility + Contact card -->
+      <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
 
         <!-- Compatibility score -->
         {% if user.is_authenticated and user != listing.owner and compatibility %}
-          <div class="mt-3 flex items-center gap-2">
+          <div class="mb-4 bg-blue-50 rounded-xl p-3">
+            <p class="text-xs text-brand-500 uppercase tracking-wide font-semibold mb-2">Compatibility Match</p>
             {% if compatibility.disqualified %}
               <span class="text-sm font-medium text-red-400">✗ Must-match conflict</span>
             {% else %}
-              <div class="flex-1 bg-gray-100 rounded-full h-2">
-                <div class="h-2 rounded-full"
-  style="width: {{ compatibility.score }}%;
-         background-color: {% if compatibility.score >= 75 %}#4ade80{% elif compatibility.score >= 50 %}#facc15{% else %}#f87171{% endif %};">
-</div>
-              <span class="text-sm font-bold
-                {% if compatibility.score >= 75 %}text-green-500
-                {% elif compatibility.score >= 50 %}text-yellow-500
-                {% else %}text-red-400{% endif %}">
-                {{ compatibility.score }}%
-              </span>
+              <div class="flex items-center gap-3">
+                <div class="flex-1 bg-gray-200 rounded-full h-2">
+                  <div class="h-2 rounded-full"
+                    style="width: {{ compatibility.score }}%;
+                           background-color: {% if compatibility.score >= 75 %}#22c55e{% elif compatibility.score >= 50 %}#eab308{% else %}#f87171{% endif %};"></div>
+                </div>
+                <span class="font-bold text-sm"
+                  style="color: {% if compatibility.score >= 75 %}#22c55e{% elif compatibility.score >= 50 %}#eab308{% else %}#f87171{% endif %};">
+                  {{ compatibility.score }}%
+                </span>
+              </div>
             {% endif %}
           </div>
-          <p class="text-xs text-gray-400 mt-1">Compatibility match</p>
         {% endif %}
 
+        <!-- Contact -->
         {% if user.is_authenticated %}
-        {% if user != listing.owner %}
-        <form method="POST" action="{% url 'start-conversation' listing.pk %}" class="mt-4">
-          {% csrf_token %}
-          <input type="text" name="body"
-                 placeholder="Write an opening message..."
-                 class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm mb-2
-                        focus:outline-none focus:ring-2 focus:ring-brand-400"/>
-          <button type="submit"
-                  class="w-full text-center bg-brand-500 hover:bg-brand-600 text-white py-2 rounded-xl text-sm transition">
-            Send message
-          </button>
-        </form>
-      {% endif %}
+          {% if user != listing.owner %}
+            <form method="POST" action="{% url 'start-conversation' listing.pk %}">
+              {% csrf_token %}
+              <input type="text" name="body"
+                     placeholder="Write an opening message..."
+                     class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm mb-2
+                            focus:outline-none focus:ring-2 focus:ring-brand-500"/>
+              <button type="submit"
+                      class="w-full text-center bg-brand-500 hover:bg-brand-600 text-white py-2.5 rounded-xl text-sm font-semibold transition">
+                Send Message
+              </button>
+            </form>
+          {% else %}
+            <p class="text-sm text-gray-400 text-center">This is your listing</p>
+          {% endif %}
         {% else %}
           <a href="{% url 'login' %}?next={{ request.path }}"
-             class="mt-4 block text-center bg-brand-500 hover:bg-brand-600 text-white py-2 rounded-xl text-sm transition">
+             class="block text-center bg-brand-500 hover:bg-brand-600 text-white py-2.5 rounded-xl text-sm font-semibold transition">
             Log in to contact
           </a>
         {% endif %}
       </div>
 
       <!-- Owner card -->
-      <div class="bg-white rounded-2xl shadow-sm p-5">
-        <p class="text-xs text-gray-400 uppercase tracking-wide mb-3">Posted by</p>
-        <div class="flex items-center gap-3">
+      <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
+        <p class="text-xs text-gray-400 uppercase tracking-wide mb-3 font-semibold">Posted by</p>
+        <div class="flex items-center gap-3 mb-3">
           {% if listing.owner.profile.image %}
             <img src="{{ listing.owner.profile.image.url }}" alt=""
-                 class="w-10 h-10 rounded-full object-cover"/>
+                 class="w-12 h-12 rounded-full object-cover"/>
           {% else %}
-            <div class="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-400 font-bold">
+            <div class="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center text-brand-500 font-bold text-lg">
               {{ listing.owner.username|first|upper }}
             </div>
           {% endif %}
           <div>
-            <p class="font-medium text-sm text-gray-700">{{ listing.owner.username }}</p>
+            <p class="font-semibold text-gray-800">{{ listing.owner.username }}</p>
             {% if listing.owner.profile.is_student %}
               <p class="text-xs text-brand-500">Student 🎓</p>
             {% endif %}
           </div>
         </div>
         {% if listing.owner.profile.bio %}
-          <p class="text-xs text-gray-500 mt-3 leading-relaxed">{{ listing.owner.profile.bio|truncatewords:20 }}</p>
+          <p class="text-xs text-gray-500 leading-relaxed">{{ listing.owner.profile.bio|truncatewords:20 }}</p>
         {% endif %}
       </div>
 

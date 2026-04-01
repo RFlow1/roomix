@@ -1,55 +1,65 @@
 {% extends "base.html" %}
-{% block title %}Inbox — Roomix{% endblock %}
+{% block title %}Inbox — RoomiX{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto">
-  <h1 class="text-2xl font-bold text-gray-800 mb-6">💬 Inbox</h1>
+<div class="max-w-2xl mx-auto px-4 py-8">
+
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">💬 Inbox</h1>
+    <p class="text-gray-400 mt-1">Your conversations with other users</p>
+  </div>
 
   {% if convo_data %}
     <div class="flex flex-col gap-3">
       {% for item in convo_data %}
         <a href="{% url 'conversation' item.conversation.pk %}"
-           class="bg-white rounded-2xl shadow-sm p-4 flex items-center gap-4 hover:shadow-md transition">
+           class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center gap-4 hover:shadow-md hover:border-brand-400 transition">
 
           <!-- Avatar -->
           {% if item.other_user.profile.image %}
             <img src="{{ item.other_user.profile.image.url }}" alt=""
-                 class="w-12 h-12 rounded-full object-cover flex-shrink-0"/>
+                 class="w-14 h-14 rounded-full object-cover flex-shrink-0 border-2 border-brand-100"/>
           {% else %}
-            <div class="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center text-brand-400 font-bold flex-shrink-0">
+            <div class="w-14 h-14 rounded-full bg-brand-100 flex items-center justify-center text-brand-500 font-bold text-xl flex-shrink-0">
               {{ item.other_user.username|first|upper }}
             </div>
           {% endif %}
 
           <!-- Info -->
           <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between gap-2">
-              <p class="font-medium text-gray-800">{{ item.other_user.username }}</p>
+            <div class="flex items-center justify-between gap-2 mb-0.5">
+              <p class="font-semibold text-gray-800">{{ item.other_user.username }}</p>
               {% if item.unread > 0 %}
-                <span class="bg-red-500 text-white text-xs rounded-full px-2 py-0.5">{{ item.unread }}</span>
+                <span class="bg-brand-500 text-white text-xs rounded-full px-2 py-0.5 flex-shrink-0">
+                  {{ item.unread }} new
+                </span>
               {% endif %}
             </div>
             {% if item.conversation.listing %}
-              <p class="text-xs text-gray-400 truncate">Re: {{ item.conversation.listing.title }}</p>
+              <p class="text-xs text-brand-500 mb-1">Re: {{ item.conversation.listing.title }}</p>
             {% endif %}
             {% if item.last_message %}
-              <p class="text-sm text-gray-500 truncate mt-0.5">{{ item.last_message.body }}</p>
+              <p class="text-sm text-gray-500 truncate">{{ item.last_message.body }}</p>
             {% endif %}
           </div>
 
-          <!-- Time -->
-          {% if item.last_message %}
-            <p class="text-xs text-gray-400 flex-shrink-0">{{ item.last_message.created_at|timesince }} ago</p>
-          {% endif %}
+          <!-- Time + arrow -->
+          <div class="flex flex-col items-end gap-1 flex-shrink-0">
+            {% if item.last_message %}
+              <p class="text-xs text-gray-400">{{ item.last_message.created_at|timesince }} ago</p>
+            {% endif %}
+            <span class="text-gray-300 text-lg">›</span>
+          </div>
 
         </a>
       {% endfor %}
     </div>
 
   {% else %}
-    <div class="text-center py-24 text-gray-400">
+    <div class="text-center py-24 text-gray-400 bg-white rounded-2xl border border-gray-100">
       <p class="text-5xl mb-4">💬</p>
-      <p class="text-lg font-medium">No messages yet</p>
+      <p class="text-lg font-medium text-gray-600">No messages yet</p>
       <p class="text-sm mt-1">Start a conversation from any
         <a href="{% url 'home' %}" class="text-brand-500 hover:underline">listing page</a>
       </p>
