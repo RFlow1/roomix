@@ -193,21 +193,28 @@
               {% endwith %}
             {% endif %}
 
-            <!-- Tags -->
-            <div class="flex flex-wrap gap-1 mt-1">
-              {% if not item.owner.profile.is_smoker %}
-                <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">🚭 No Smoking</span>
-              {% endif %}
-              {% if item.owner.profile.sleep_schedule == 'early' %}
-                <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">🌅 Early Bird</span>
-              {% elif item.owner.profile.sleep_schedule == 'night' %}
-                <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">🌙 Night Owl</span>
-              {% endif %}
-              {% if not item.owner.profile.has_pets %}
-                <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">🐾 No Pets</span>
-              {% endif %}
-            </div>
+            <!-- Bed / Bath -->
+<div class="flex gap-3 text-xs text-gray-500 mt-1">
+  <span>🛏 {{ item.bedrooms }} bed{{ item.bedrooms|pluralize }}</span>
+  <span>🚿 {{ item.bathrooms }} bath</span>
+  {% if item.is_furnished %}<span>🛋️ Furnished</span>{% endif %}
+</div>
 
+<!-- Tags -->
+<div class="flex flex-wrap gap-1 mt-1">
+  {% if not item.owner.profile.is_smoker %}
+    <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">🚭 No Smoking</span>
+  {% endif %}
+  {% if item.quiet_hours %}
+    <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">🌙 Quiet Hours</span>
+  {% endif %}
+  {% if item.utilities_included %}
+    <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">💡 Utilities incl.</span>
+  {% endif %}
+  {% if item.owner.profile.is_lgbtq_friendly %}
+    <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">🏳️‍🌈 LGBTQ+</span>
+  {% endif %}
+</div>
             <a href="{{ item.get_absolute_url }}"
                class="mt-auto block text-center bg-brand-500 hover:bg-brand-600 text-white py-2 rounded-xl text-sm font-semibold transition">
               View Details →

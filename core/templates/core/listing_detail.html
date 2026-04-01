@@ -44,7 +44,17 @@
         ${{ listing.price }}<span class="text-gray-400 text-base font-normal">/mo</span>
       </p>
       <h1 class="text-2xl font-bold text-gray-800 mb-1">{{ listing.title }}</h1>
-      <p class="text-gray-400 text-sm mb-6">📍 {{ listing.location }}</p>
+      <p class="text-gray-400 text-sm mb-4">📍 {{ listing.location }}</p>
+
+      <!-- Bed / Bath / Key stats -->
+      <div class="flex gap-6 text-sm text-gray-600 bg-gray-50 rounded-xl px-4 py-3 mb-6">
+        <span>🛏 {{ listing.bedrooms }} bed{{ listing.bedrooms|pluralize }}</span>
+        <span>🚿 {{ listing.bathrooms }} bath</span>
+        {% if listing.is_furnished %}<span>🛋️ Furnished</span>{% endif %}
+        {% if listing.utilities_included %}<span>💡 Utilities incl.</span>{% endif %}
+        {% if listing.parking_available %}<span>🚗 Parking</span>{% endif %}
+        {% if listing.quiet_hours %}<span>🌙 Quiet hours</span>{% endif %}
+      </div>
 
       <!-- Tags -->
       <div class="flex flex-wrap gap-2 mb-6">
@@ -63,6 +73,14 @@
           <span class="text-sm bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
             ⭐ Hygiene {{ listing.owner.profile.cleanliness }}/3
           </span>
+        {% endif %}
+        {% if listing.owner.profile.noise_level %}
+          <span class="text-sm bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
+            🔊 {{ listing.owner.profile.get_noise_level_display }}
+          </span>
+        {% endif %}
+        {% if listing.owner.profile.is_lgbtq_friendly %}
+          <span class="text-sm bg-gray-100 text-gray-600 px-3 py-1 rounded-full">🏳️‍🌈 LGBTQ+ Friendly</span>
         {% endif %}
       </div>
 

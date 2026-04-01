@@ -30,6 +30,14 @@ class Profile(models.Model):
         ('night', 'Night Owl'),
     ]
     sleep_schedule = models.CharField(max_length=10, choices=SLEEP_CHOICES, blank=True)
+    is_lgbtq_friendly = models.BooleanField(default=False)
+
+    NOISE_CHOICES = [
+        ('quiet', 'Quiet'),
+        ('moderate', 'Moderate'),
+         ('loud', 'Loud'),
+    ]
+    noise_level = models.CharField(max_length=10, choices=NOISE_CHOICES, blank=True)
     image = models.ImageField(upload_to='profile_pics/', default='default_profile.jpg')
     created_at = models.DateTimeField(auto_now_add=True)  
 
@@ -45,7 +53,7 @@ class Profile(models.Model):
     budget_importance = models.IntegerField(choices=IMPORTANCE_CHOICES , default=1)
     smoker_importance = models.IntegerField(choices=IMPORTANCE_CHOICES , default=1)
     pets_importance = models.IntegerField(choices=IMPORTANCE_CHOICES , default=1)
-    
+    noise_level_importance = models.IntegerField(choices=IMPORTANCE_CHOICES, default=1)
 
 
 
@@ -70,6 +78,12 @@ class Listing(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)  
     location = models.CharField(max_length=255)
     available_from = models.DateField()
+    bedrooms = models.PositiveIntegerField(default=1)
+    bathrooms = models.DecimalField(max_digits=3, decimal_places=1, default=1.0)
+    is_furnished = models.BooleanField(default=False)
+    utilities_included = models.BooleanField(default=False)
+    parking_available = models.BooleanField(default=False)
+    quiet_hours = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)  
 

@@ -65,11 +65,15 @@ class ListingDetailView(DetailView):
 class ListingCreateView(LoginRequiredMixin, CreateView):
     model = Listing
     template_name = 'core/listing_form.html'
-    fields = ['title', 'description', 'price', 'location', 'available_from']
+    fields = ['title', 'description', 'price', 'location', 'available_from', 'bedrooms', 'bathrooms']
     login_url = '/accounts/login/'
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
+        form.instance.is_furnished = 'is_furnished' in self.request.POST
+        form.instance.utilities_included = 'utilities_included' in self.request.POST
+        form.instance.parking_available = 'parking_available' in self.request.POST
+        form.instance.quiet_hours = 'quiet_hours' in self.request.POST
         response = super().form_valid(form)
         for image in self.request.FILES.getlist('images'):
             ListingImage.objects.create(listing=self.object, image=image)
@@ -82,9 +86,13 @@ class ListingCreateView(LoginRequiredMixin, CreateView):
 class ListingUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Listing
     template_name = 'core/listing_form.html'
-    fields = ['title', 'description', 'price', 'location', 'available_from']
+    fields = ['title', 'description', 'price', 'location', 'available_from', 'bedrooms', 'bathrooms']
 
     def form_valid(self, form):
+        form.instance.is_furnished = 'is_furnished' in self.request.POST
+        form.instance.utilities_included = 'utilities_included' in self.request.POST
+        form.instance.parking_available = 'parking_available' in self.request.POST
+        form.instance.quiet_hours = 'quiet_hours' in self.request.POST
         response = super().form_valid(form)
         for image in self.request.FILES.getlist('images'):
             ListingImage.objects.create(listing=self.object, image=image)
@@ -133,6 +141,7 @@ class ProfileView(LoginRequiredMixin, View):
         ('budget_importance', 'Budget'),
         ('smoker_importance', 'Smoking'),
         ('pets_importance', 'Pets'),
+        ('noise_level_importance', 'Noise Level'),
     ]
 
     def get(self, request):
@@ -154,6 +163,8 @@ class ProfileView(LoginRequiredMixin, View):
         profile.cleanliness = request.POST.get('cleanliness') or None
         for field, _ in self.LIFESTYLE_FIELDS:
             setattr(profile, field, field in request.POST)
+            profile.is_lgbtq_friendly = 'is_lgbtq_friendly' in request.POST
+            profile.noise_level = request.POST.get('noise_level', '')
         for field, _ in self.IMPORTANCE_FIELDS:
             setattr(profile, field, request.POST.get(field, 1))
         if 'image' in request.FILES:

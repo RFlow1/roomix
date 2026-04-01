@@ -9,6 +9,7 @@ def compatibility_score(viewer_profile , listing_profile):
         ('sleep_schedule' , 'sleep_schedule_importance'),
         ('is_smoker' , 'smoker_importance'),
         ('has_pets' , 'pets_importance'),
+        ('noise_level', 'noise_level_importance'),
     ]
 
     for field, importance_field in factors:

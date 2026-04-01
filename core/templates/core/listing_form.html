@@ -1,40 +1,109 @@
 {% extends "base.html" %}
 {% load core_extras %}
-{% block title %}{% if form.instance.pk %}Edit listing{% else %}Post a listing{% endif %} — Roomix{% endblock %}
+{% block title %}{% if form.instance.pk %}Edit listing{% else %}Post a listing{% endif %} — RoomiX{% endblock %}
 
 {% block content %}
-<div class="max-w-xl mx-auto">
-  <h1 class="text-2xl font-bold text-gray-800 mb-6">
-    {% if form.instance.pk %}Edit your listing{% else %}Post a new listing 🏠{% endif %}
-  </h1>
+<div class="max-w-2xl mx-auto px-4 py-8">
 
-  <form method="POST" enctype="multipart/form-data"
-        class="bg-white rounded-2xl shadow-sm p-6 flex flex-col gap-5">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">
+      {% if form.instance.pk %}Edit your listing{% else %}Post a new listing{% endif %}
+    </h1>
+    <p class="text-gray-400 mt-1">Fill in the details about your room</p>
+  </div>
+
+  <form method="POST" enctype="multipart/form-data" class="flex flex-col gap-6">
     {% csrf_token %}
 
-    {% for field in form %}
-      <div class="flex flex-col gap-1">
-        <label class="text-sm font-medium text-gray-700">{{ field.label }}</label>
-        {{ field|add_class:"border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 w-full" }}
-        {% if field.errors %}
-          <p class="text-xs text-red-400">{{ field.errors|join:", " }}</p>
-        {% endif %}
-        {% if field.help_text %}
-          <p class="text-xs text-gray-400">{{ field.help_text }}</p>
-        {% endif %}
-      </div>
-    {% endfor %}
+    <!-- Basic info -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col gap-4">
+      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Basic Info</h2>
 
-    <div class="flex flex-col gap-1">
-      <label class="text-sm font-medium text-gray-700">Photos</label>
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-gray-700">Title</label>
+        {{ form.title|add_class:"border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 w-full" }}
+        {% if form.title.errors %}<p class="text-xs text-red-400">{{ form.title.errors|join:", " }}</p>{% endif %}
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-gray-700">Description</label>
+        {{ form.description|add_class:"border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 w-full" }}
+        {% if form.description.errors %}<p class="text-xs text-red-400">{{ form.description.errors|join:", " }}</p>{% endif %}
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-gray-700">Monthly Rent ($)</label>
+          {{ form.price|add_class:"border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 w-full" }}
+          {% if form.price.errors %}<p class="text-xs text-red-400">{{ form.price.errors|join:", " }}</p>{% endif %}
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-gray-700">Available From</label>
+          {{ form.available_from|add_class:"border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 w-full" }}
+          {% if form.available_from.errors %}<p class="text-xs text-red-400">{{ form.available_from.errors|join:", " }}</p>{% endif %}
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-gray-700">Location</label>
+        {{ form.location|add_class:"border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 w-full" }}
+        {% if form.location.errors %}<p class="text-xs text-red-400">{{ form.location.errors|join:", " }}</p>{% endif %}
+      </div>
+    </div>
+
+    <!-- Room details -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col gap-4">
+      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Room Details</h2>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-gray-700">Bedrooms</label>
+          {{ form.bedrooms|add_class:"border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 w-full" }}
+          {% if form.bedrooms.errors %}<p class="text-xs text-red-400">{{ form.bedrooms.errors|join:", " }}</p>{% endif %}
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-gray-700">Bathrooms</label>
+          {{ form.bathrooms|add_class:"border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 w-full" }}
+          {% if form.bathrooms.errors %}<p class="text-xs text-red-400">{{ form.bathrooms.errors|join:", " }}</p>{% endif %}
+        </div>
+      </div>
+
+      <!-- Checkboxes -->
+      <div class="grid grid-cols-2 gap-3 mt-1">
+        <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+          <input type="checkbox" name="is_furnished" {% if form.instance.is_furnished %}checked{% endif %}
+                 class="accent-brand-500 w-4 h-4"/>
+          🛋️ Furnished
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+          <input type="checkbox" name="utilities_included" {% if form.instance.utilities_included %}checked{% endif %}
+                 class="accent-brand-500 w-4 h-4"/>
+          💡 Utilities Included
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+          <input type="checkbox" name="parking_available" {% if form.instance.parking_available %}checked{% endif %}
+                 class="accent-brand-500 w-4 h-4"/>
+          🚗 Parking Available
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+          <input type="checkbox" name="quiet_hours" {% if form.instance.quiet_hours %}checked{% endif %}
+                 class="accent-brand-500 w-4 h-4"/>
+          🌙 Quiet Hours
+        </label>
+      </div>
+    </div>
+
+    <!-- Photos -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col gap-3">
+      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Photos</h2>
       <input type="file" name="images" multiple accept="image/*"
              class="text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-4 file:rounded-xl
-                    file:border-0 file:bg-brand-100 file:text-brand-600 hover:file:bg-brand-200"/>
+                    file:border-0 file:bg-brand-500 file:text-white hover:file:bg-brand-600 file:cursor-pointer"/>
       <p class="text-xs text-gray-400">Upload up to 10 photos</p>
     </div>
 
     <button type="submit"
-            class="bg-brand-500 hover:bg-brand-600 text-white py-2.5 rounded-xl font-medium transition">
+            class="bg-brand-500 hover:bg-brand-600 text-white py-3 rounded-xl font-semibold transition">
       {% if form.instance.pk %}Save changes{% else %}Post listing{% endif %}
     </button>
 
